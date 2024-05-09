@@ -14,7 +14,6 @@ class _KitchenIntroState extends State<KitchenIntro> {
     "https://content.jdmagicbox.com/comp/mumbai/u9/022pxx22.xx22.210114072516.i2u9/catalogue/ghadi-s-tiffin-service-mulund-east-mumbai-tiffin-services-qkdq6028vx.jpg",
     "https://cascade.madmimi.com/promotion_images/1602/1370/original/Everyday_Meal_Plate_Baby_Corn_Thoran_Arbi_Pulusu_Pottu_Kadalai_Curry-1.jpg?1488787731",
     "https://www.mishry.com/wp-content/uploads/2020/04/oats-idli.jpg",
-    "https://dipsdiner.com/dd/wp-content/uploads/2015/04/Maharashrian-Recipes-for-breakfast-Kande-Pohe.jpg",
   ];
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class _KitchenIntroState extends State<KitchenIntro> {
               height: 250,
               width: double.infinity,
               child: CarouselSlider.builder(
-                itemCount: 5,
+                itemCount: 4,
                 itemBuilder: (context,index,realIndex){
                   return Container(
                     width: double.infinity,
@@ -37,7 +36,7 @@ class _KitchenIntroState extends State<KitchenIntro> {
                   );
                 }, 
                 options: CarouselOptions(
-                  height: 300,
+                  height: 400,
                   autoPlay: true,
                   autoPlayInterval: Duration(seconds: 3),
                   enlargeCenterPage: true,
@@ -45,168 +44,28 @@ class _KitchenIntroState extends State<KitchenIntro> {
             ),
             SizedBox(height: 20,),
             Container(
-              child: Row(
-                children: [
-                  SizedBox(width: 20,),
-                  Text("Owner :- Amogh Ghadi",style: TextStyle(fontStyle: FontStyle.italic,fontSize: 30,color: Colors.black87,fontWeight: FontWeight.bold),),
-                ],
-              )
-            ),
-            SizedBox(height: 10,),
-            Row(
-              children: [
-                SizedBox(width: 20,),
-                Container(
-                  child: Text("About Kitchen :-",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),)
-                ),
-              ],
-            ),
-            SizedBox(height: 10,),
-            Container(
               width: 320,
-              height: 190,
-              // decoration: BoxDecoration(
-              //   border: Border.all(
-              //     color: Colors.black
-              //   ),
-              //   borderRadius: BorderRadius.circular(15),
-              // ),
+              height: 300,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("Ghadi's Kitchen was established",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("in 1980's. It was started by my ",style: TextStyle(fontSize: 20)),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("father Mr Vijay Ghadi in Mumbai. ",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("Today, we have branches at diff- ",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("erent places in Mumbai, Thane & ",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("Pune.",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10,),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("We have different dishes, such ",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("as Upma, Pohe, Idli-Sambar &",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("dosas. We also have Chapatis.",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("& different types of Bhajis",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10,),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("We also have a daily meal thali",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("consisting various special items",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("such as chapati, bhaji, dal, rice ",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("& desert.",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10,),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("Thank you !",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Container(
-                            child: Text("Amogh Ghadi.",style: TextStyle(fontSize: 20),),
-                          ),
-                        ],
-                      ),
-                  ],
+                    Text("Ghadi's Kitchen: A Tradition of Authentic Maharashtrian Cuisine",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                    SizedBox(height: 20,),
+                    Text("Established in the 1980s by Mr. Vijay Ghadi in Mumbai, Ghadi's Kitchen has grown into a family-run restaurant group with branches across Mumbai, Thane, and Pune. We specialize in traditional Maharashtrian cuisine, offering a variety of dishes that cater to all palates.",style: TextStyle(fontSize: 20),),
+                    SizedBox(height: 20,),
+                    Text("Our Menu:",style: TextStyle(fontSize: 23,fontWeight: FontWeight.bold),),
+                    SizedBox(height: 15,),
+                    Text("Breakfast Delights:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                    Text("We start your day right with a selection of classic Maharashtrian breakfast dishes like Upma, Pohe, Idli-Sambar, and Dosas.",style: TextStyle(fontSize: 20),),
+                    SizedBox(height: 10,),
+                    Text("Lunch and Dinner Thalis:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                    Text("Enjoy a complete and satisfying meal with our daily specials. Our Thalis include a variety of Bhajis (vegetable fritters), Chapati (flatbreads), Dal (lentil soup), Rice, and a sweet ending with Dessert.",style: TextStyle(fontSize: 20),),
+                    SizedBox(height: 10,),
+                    Text("Authentic Flavors:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                    Text("We use only the freshest ingredients and traditional recipes to create authentic Maharashtrian dishes that are both delicious and comforting.",style: TextStyle(fontSize: 20),),
+                 ],
                 ),
               ),
             )

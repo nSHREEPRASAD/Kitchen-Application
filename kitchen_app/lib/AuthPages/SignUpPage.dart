@@ -30,10 +30,12 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     final _auth=FirebaseAuth.instance;
+    final screenW = MediaQuery.of(context).size.width;
+    final screenH = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("SignUp"),
+        title: Text("Sign Up"),
       ),
       body: isLoading==true?Center(child: CircularProgressIndicator()): Container(
         width: double.infinity,
@@ -43,15 +45,15 @@ class _SignUpState extends State<SignUp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 10,),
+              SizedBox(height: (screenH*10)/672,),
               Container(
-                width: 200,
-                height: 200,
+                width: (screenW*200)/360,
+                height: (screenH*200)/672,
                 child: Lottie.asset("assets/animations/KitchenAppLoginAnimation.json"),
               ),
-              SizedBox(height: 40,),
+              SizedBox(height: (screenH*40)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Form(
                   key: _key2,
                   child: TextFormField(
@@ -72,30 +74,30 @@ class _SignUpState extends State<SignUp> {
                       borderRadius: BorderRadius.circular(11),
                       borderSide: BorderSide(
                         color: Colors.grey,
-                        width: 2,
+                        width: (screenW*2)/360,
                       )
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.black,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.red,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       )
                     ),
                   )
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: (screenH*10)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Form(
                   key: _key3,
                   child: TextFormField(
@@ -123,34 +125,34 @@ class _SignUpState extends State<SignUp> {
                       borderRadius: BorderRadius.circular(11),
                       borderSide: BorderSide(
                         color: Colors.grey,
-                        width: 2,
+                        width: (screenW*2)/360,
                       )
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.black,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.red,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       )
                     ),
                   )
                 ),
               ),
-              SizedBox(height: 15,),
+              SizedBox(height: (screenH*15)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Row(
                   children: [
                     Text("Already Have an Account ?"),
-                    SizedBox(width: 30,),
+                    SizedBox(width: (screenW*30)/360,),
                     TextButton(onPressed: (){
                       setState(() {
                         isLoading=true;
@@ -166,9 +168,9 @@ class _SignUpState extends State<SignUp> {
                   ],
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: (screenH*10)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: ElevatedButton(
                   onPressed: (){
                     if(!_key2.currentState!.validate() || !_key3.currentState!.validate()){
