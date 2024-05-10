@@ -1,7 +1,11 @@
+import 'dart:ffi';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CustomerCorner extends StatefulWidget {
   const CustomerCorner({super.key});
@@ -12,133 +16,127 @@ class CustomerCorner extends StatefulWidget {
 
 class _CustomerCornerState extends State<CustomerCorner> {
   final _key1=GlobalKey<FormState>();
-  TextEditingController reViewcontroller=TextEditingController();
-  String NodeName="";
+  TextEditingController reviewcontroller=TextEditingController();
+  List Likess = [];
   @override
   Widget build(BuildContext context) {
     final _auth=FirebaseAuth.instance;
-    final dataref=FirebaseDatabase.instance.ref("Reviews");
+    final _firestore = FirebaseFirestore.instance.collection("Customer Reviews");
+    var ScreenH = MediaQuery.of(context).size.height;
+    var ScreenW = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: Text("Customer's Corner"),
       ),
-      body: Row(
-        children: [
-          SizedBox(width: 10,),
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  width: 340,
-                  height: 420,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black
-                    ),
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  child: FirebaseAnimatedList(
-                    query: dataref,
-                    defaultChild: Center(child: Text("Empty",style: TextStyle(color: Colors.grey),)), 
-                    itemBuilder:(context,snapshot,animation,index){
-                      return Card(
-                        child: ListTile(
-                          leading: Icon(Icons.person),
-                          title: Text(snapshot.child("Email Id").value.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
-                          subtitle:Text(snapshot.child("Review").value.toString()), 
-                          trailing: Icon(Icons.star,color:Colors.amber,),
-                        ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Container(
+                width: double.infinity,
+                height: (ScreenH*450)/672,
+                child: StreamBuilder(
+                  stream: _firestore.snapshots(), 
+                  builder: (context, snapshot) {
+                    if(snapshot.hasData){
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: Container(
+                              height: (ScreenH*100)/672,
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  child: Icon(Icons.person),
+                                ),
+                                title: Text("${_auth.currentUser!.email.toString()}",style: TextStyle(fontSize: (ScreenH*15)/672,color: Colors.blueGrey),),
+                                subtitle: Text("${snapshot.data!.docs[index]["Review"]}",style: TextStyle(fontSize: (ScreenH*15)/672),),
+                                trailing: Container(
+                                  height: (ScreenH*120)/672,
+                                  width: (ScreenW*80)/360,
+                                  // color: Colors.amber,
+                                  child: Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () async{
+                                          var Likes = List.from(snapshot.data!.docs[index]["Likes"]??[]);
+                                          if(Likes.contains(_auth.currentUser!.uid.toString())){
+                                            Likes.remove(_auth.currentUser!.uid.toString());
+                                          }
+                                          else{
+                                            Likes.add(_auth.currentUser!.uid.toString());
+                                          }
+                                          await _firestore.doc(snapshot.data!.docs[index].id).update({
+                                            "Likes":Likes
+                                          });
+                                        }, 
+                                        icon: snapshot.data!.docs[index]["Likes"].contains(_auth.currentUser!.uid.toString())?Icon(Icons.favorite,color: Colors.red,):Icon(Icons.favorite,color: Colors.black,)
+                                      ),
+                                      Text(snapshot.data!.docs[index]["Likes"].length.toString(),style: TextStyle(fontSize: (ScreenH*10)/672),)
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ),
+                          );
+                        },
                       );
                     }
-                  ),
-                ),
-                SizedBox(height: 5,),
-                Container(
-                  width: 340,
-                  height: 160, 
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black
-                    ),
-                    borderRadius: BorderRadius.circular(11)
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 320,
-                      height: 160,
-                      child: SingleChildScrollView(
-                        child: Column(
-                        children: [
-                          Form(
-                            key: _key1,
-                            child: TextFormField(
-                              validator: (value) {
-                                if(value!.isNotEmpty){
-                                  return null;
-                                }
-                                else{
-                                  return "Please Enter Review";
-                                }
-                              },
-                              controller: reViewcontroller,
-                              maxLines: 3,
-                              maxLength: 90,
-                              decoration: InputDecoration(
-                                hintText: "Kitchen's Speciality",
-                                enabledBorder: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.circular(11),
-                                  borderSide: BorderSide(
-                                    color: Colors.grey
-                                  ),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.circular(11),
-                                  borderSide: BorderSide(
-                                    color: Colors.black
-                                  )
-                                ),
-                                focusedErrorBorder: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.circular(11),
-                                  borderSide: BorderSide(
-                                    color: Colors.red
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ), 
-                          ElevatedButton(onPressed: (){
-                            if(!_key1.currentState!.validate()){
-                              return;
-                            }
-                            else{
-                              NodeName=DateTime.now().millisecondsSinceEpoch.toString();
-                              dataref.child(NodeName).set({
-                                "Id":_auth.currentUser!.uid.toString(),
-                                "Email Id":_auth.currentUser!.email.toString(),
-                                "Review":reViewcontroller.text.toString()
-                              });
-                              reViewcontroller.clear();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Review Posted."),
-                                  duration: Duration(seconds: 1),
-                                  backgroundColor: Colors.green,
-                                )
-                              );
-                            }
-                          }, child: Text("Submit Review"))
-                        ],
-                       ),
-                      ),
-                    )
-                    )
+                    else{
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  },
                 )
-              ],
+              ),
             ),
-          ),
-          
-        ],
-      ),
+            SizedBox(height: (ScreenH*5)/672,),
+            Container(
+              width: (ScreenW*320)/360,
+              child: Form(
+                key: _key1,
+                child: TextFormField(
+                  validator: (value) {
+                    if(value!.isNotEmpty){
+                      return null;
+                    }
+                    else{
+                      return "Please Enter Your Review";
+                    }
+                  },
+                  controller: reviewcontroller,
+                  decoration: InputDecoration(
+                    hintText: "Enter Your Review...",
+                    suffix: IconButton(
+                      onPressed: (){
+                        if(!_key1.currentState!.validate()){
+                          return;
+                        }
+                        else{
+                           _firestore.add({
+                            "Review": reviewcontroller.text.toString(),
+                            "Likes": Likess
+                          }).then((value){
+                            reviewcontroller.clear();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Review Posted Successfully !"),
+                                duration: Duration(seconds: 2),
+                                backgroundColor: Colors.green,
+                              )
+                            );
+                          });
+                        }
+                      }, 
+                      icon: Icon(Icons.send)
+                    )
+                  ),
+                )
+              ),
+            )
+          ],
+        ),
+      )
     );
   }
 }
