@@ -31,12 +31,14 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     final _auth=FirebaseAuth.instance;
+    final screenW = MediaQuery.of(context).size.width;
+    final screenH = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("SignIn"),
+        backgroundColor: Colors.green,
+        title: Text("SignIn",style: TextStyle(color: Colors.white),),
       ),
-      body: isLoading==true?Center(child: CircularProgressIndicator()):Container(
+      body: isLoading==true?Center(child: CircularProgressIndicator(color: Colors.green,)):Container(
         width: double.infinity,
         height: double.infinity,
         child: SingleChildScrollView(
@@ -44,15 +46,15 @@ class _SignInState extends State<SignIn> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 10,),
+              SizedBox(height: (screenH*10)/672,),
               Container(
-                width: 200,
-                height: 200,
+                width: (screenW*200)/360,
+                height: (screenH*200)/672,
                 child: Lottie.asset("assets/animations/KitchenAppLoginAnimation.json"),
               ),
-              SizedBox(height: 40,),
+              SizedBox(height: (screenH*40)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Form(
                   key: _key2,
                   child: TextFormField(
@@ -73,30 +75,30 @@ class _SignInState extends State<SignIn> {
                       borderRadius: BorderRadius.circular(11),
                       borderSide: BorderSide(
                         color: Colors.grey,
-                        width: 2,
+                        width: (screenW*2)/360,
                       )
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.black,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.red,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       )
                     ),
                   )
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: (screenH*10)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Form(
                   key: _key3,
                   child: TextFormField(
@@ -124,34 +126,34 @@ class _SignInState extends State<SignIn> {
                       borderRadius: BorderRadius.circular(11),
                       borderSide: BorderSide(
                         color: Colors.grey,
-                        width: 2,
+                        width: (screenW*2)/360,
                       )
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.black,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.red,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       )
                     ),
                   )
                 ),
               ),
-              SizedBox(height: 15,),
+              SizedBox(height: (screenH*15)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Row(
                   children: [
                     Text("Don't Have an Account ?"),
-                    SizedBox(width: 30,),
+                    SizedBox(width: (screenW*15)/360,),
                     TextButton(onPressed: (){
                       setState(() {
                         isLoading=true;
@@ -162,14 +164,17 @@ class _SignInState extends State<SignIn> {
                         });
                         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignUp()));
                       });
-                    }, child: Text("Sign Up"))
+                    }, child: Text("Sign Up",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),))
                   ],
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: (screenH*10)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green
+                  ),
                   onPressed: (){
                     _auth.signInWithEmailAndPassword(
                       email: EmailController.text.toString(),
@@ -182,14 +187,12 @@ class _SignInState extends State<SignIn> {
                         setState(() {
                           isLoading=false;
                         });
-                        if(_auth.currentUser!.uid=="ZmMUZWvb4td0RKvhOoHSD34QCIo2")
-                        {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>OwnerHomePage()));
-                        }
-                        else
-                        {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Kitchen()));
-                        }
+                        if(PasswordController.text.toString()=="OWNER@123"){
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>OwnerHomePage()));
+                          }
+                          else{
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Kitchen()));
+                          }
                       });
                     }).onError((error, stackTrace){
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,7 +207,7 @@ class _SignInState extends State<SignIn> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Sign In")
+                      Text("Sign In",style: TextStyle(color: Colors.white),)
                     ],
                   )
                 ),

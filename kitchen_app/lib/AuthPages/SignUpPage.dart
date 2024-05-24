@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +18,11 @@ class _SignUpState extends State<SignUp> {
   bool isLoading=false;
   final _key2=GlobalKey<FormState>();
   final _key3=GlobalKey<FormState>();
+  final _key4=GlobalKey<FormState>();
 
   TextEditingController EmailController=TextEditingController();
   TextEditingController PasswordController=TextEditingController();
+  TextEditingController UsernameController=TextEditingController();
 
   @override
   void dispose() {
@@ -32,12 +35,13 @@ class _SignUpState extends State<SignUp> {
     final _auth=FirebaseAuth.instance;
     final screenW = MediaQuery.of(context).size.width;
     final screenH = MediaQuery.of(context).size.height;
+    final _firestore = FirebaseFirestore.instance.collection("Users");
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Sign Up"),
+        backgroundColor: Colors.green,
+        title: Text("Sign Up",style: TextStyle(color: Colors.white),),
       ),
-      body: isLoading==true?Center(child: CircularProgressIndicator()): Container(
+      body: isLoading==true?Center(child: CircularProgressIndicator(color: Colors.green,)): Container(
         width: double.infinity,
         height: double.infinity,
         child: SingleChildScrollView(
@@ -51,7 +55,49 @@ class _SignUpState extends State<SignUp> {
                 height: (screenH*200)/672,
                 child: Lottie.asset("assets/animations/KitchenAppLoginAnimation.json"),
               ),
-              SizedBox(height: (screenH*40)/672,),
+              Container(
+                width: (screenW*300)/360,
+                child: Form(
+                  key: _key4,
+                  child: TextFormField(
+                    controller: UsernameController,
+                    validator: (value) {
+                      if(value!.isNotEmpty){
+                        return null;
+                      }
+                      else{
+                        return "Please Enter Usename";
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Username",
+                      prefixIcon: Icon(Icons.person),
+                      enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(11),
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: (screenW*2)/360,
+                      )
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(11),
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                          width: (screenW*2)/360,
+                        )
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(11),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: (screenW*2)/360,
+                        )
+                      )
+                    ),
+                  )
+                ),
+              ),
+              SizedBox(height: (screenH*10)/672,),
               Container(
                 width: (screenW*300)/360,
                 child: Form(
@@ -152,7 +198,7 @@ class _SignUpState extends State<SignUp> {
                 child: Row(
                   children: [
                     Text("Already Have an Account ?"),
-                    SizedBox(width: (screenW*30)/360,),
+                    SizedBox(width: (screenW*15)/360,),
                     TextButton(onPressed: (){
                       setState(() {
                         isLoading=true;
@@ -164,7 +210,7 @@ class _SignUpState extends State<SignUp> {
                         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignIn()));
                       });
                       
-                    }, child: Text("Sign In"))
+                    }, child: Text("Sign In",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),))
                   ],
                 ),
               ),
@@ -172,8 +218,11 @@ class _SignUpState extends State<SignUp> {
               Container(
                 width: (screenW*300)/360,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green
+                  ),
                   onPressed: (){
-                    if(!_key2.currentState!.validate() || !_key3.currentState!.validate()){
+                    if(!_key4.currentState!.validate() || !_key2.currentState!.validate() || !_key3.currentState!.validate()){
                       return;
                     }
                     else{
@@ -181,15 +230,24 @@ class _SignUpState extends State<SignUp> {
                         email: EmailController.text.toString(), 
                         password: PasswordController.text.toString()
                       ).then((value){
+                        _firestore.doc(_auth.currentUser!.uid.toString()).set({
+                          "Username":UsernameController.text.toString(),
+                          "Email Address":EmailController.text.toString()
+                        });
                         setState(() {
                           isLoading=true;
                         });
 
                         Future.delayed(Duration(seconds: 1),(){
                           setState(() {
-                          isLoading=false;
-                        });
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Kitchen()));
+                            isLoading=false;
+                          });
+                          if(PasswordController.text.toString()=="OWNER@123"){
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>OwnerHomePage()));
+                          }
+                          else{
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Kitchen()));
+                          }
                         });
                       }).onError((error, stackTrace){
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -205,7 +263,7 @@ class _SignUpState extends State<SignUp> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Sign Up")
+                      Text("Sign Up",style: TextStyle(color: Colors.white),)
                     ],
                   )
                 ),

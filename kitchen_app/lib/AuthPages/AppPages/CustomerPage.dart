@@ -18,9 +18,23 @@ class _CustomerCornerState extends State<CustomerCorner> {
   final _key1=GlobalKey<FormState>();
   TextEditingController reviewcontroller=TextEditingController();
   List Likess = [];
+
+  Map<String,dynamic> userMap={};
+  final _auth=FirebaseAuth.instance;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseFirestore.instance.collection("Users")
+    .doc(_auth.currentUser!.uid.toString())
+    .get().then((value){
+      setState(() {
+        userMap=value.data()!;
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    final _auth=FirebaseAuth.instance;
     final _firestore = FirebaseFirestore.instance.collection("Customer Reviews");
     var ScreenH = MediaQuery.of(context).size.height;
     var ScreenW = MediaQuery.of(context).size.width;
@@ -45,12 +59,11 @@ class _CustomerCornerState extends State<CustomerCorner> {
                         itemBuilder: (context, index) {
                           return Card(
                             child: Container(
-                              height: (ScreenH*100)/672,
                               child: ListTile(
                                 leading: CircleAvatar(
                                   child: Icon(Icons.person),
                                 ),
-                                title: Text("${_auth.currentUser!.email.toString()}",style: TextStyle(fontSize: (ScreenH*15)/672,color: Colors.blueGrey),),
+                                title: Text("${snapshot.data!.docs[index]["Username"]}",style: TextStyle(fontSize: (ScreenH*15)/672,color: Colors.blueGrey),),
                                 subtitle: Text("${snapshot.data!.docs[index]["Review"]}",style: TextStyle(fontSize: (ScreenH*15)/672),),
                                 trailing: Container(
                                   height: (ScreenH*120)/672,
@@ -71,7 +84,7 @@ class _CustomerCornerState extends State<CustomerCorner> {
                                             "Likes":Likes
                                           });
                                         }, 
-                                        icon: snapshot.data!.docs[index]["Likes"].contains(_auth.currentUser!.uid.toString())?Icon(Icons.favorite,color: Colors.red,):Icon(Icons.favorite,color: Colors.black,)
+                                        icon: snapshot.data!.docs[index]["Likes"].contains(_auth.currentUser!.uid.toString())?Icon(Icons.favorite,color: Colors.red,):Icon(Icons.favorite,color: Colors.blueGrey,)
                                       ),
                                       Text(snapshot.data!.docs[index]["Likes"].length.toString(),style: TextStyle(fontSize: (ScreenH*10)/672),)
                                     ],
@@ -96,6 +109,7 @@ class _CustomerCornerState extends State<CustomerCorner> {
               child: Form(
                 key: _key1,
                 child: TextFormField(
+                  maxLines: 2,
                   validator: (value) {
                     if(value!.isNotEmpty){
                       return null;
@@ -115,7 +129,8 @@ class _CustomerCornerState extends State<CustomerCorner> {
                         else{
                            _firestore.add({
                             "Review": reviewcontroller.text.toString(),
-                            "Likes": Likess
+                            "Likes": Likess,
+                            "Username": userMap["Username"]
                           }).then((value){
                             reviewcontroller.clear();
                             ScaffoldMessenger.of(context).showSnackBar(

@@ -5,6 +5,7 @@ import 'package:kitchen_app/AuthPages/AppPages/OwnerAddDish.dart';
 import 'package:kitchen_app/AuthPages/AppPages/OwnerReadReviews.dart';
 import 'package:kitchen_app/AuthPages/AppPages/OwnerReceiveOrders.dart';
 import 'package:kitchen_app/AuthPages/AppPages/OwnerSpecialDish.dart';
+import 'package:kitchen_app/AuthPages/SignInPage.dart';
 import 'package:kitchen_app/AuthPages/SignUpPage.dart';
 
 class OwnerHomePage extends StatefulWidget {
@@ -21,87 +22,84 @@ class __OwnerHomePageState extends State<OwnerHomePage> {
     OwnerAddDish(),
     OwnerReceiveOrders(),
   ];
+  FirebaseAuth _auth=FirebaseAuth.instance;
+  Map<String,dynamic> userMap = {};
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    FirebaseFirestore.instance.collection("Users")
+    .doc(_auth.currentUser!.uid.toString())
+    .get()
+    .then((value) {
+      setState(() {
+        userMap=value.data()!;
+      });
+    },);
+  }
   @override
   Widget build(BuildContext context) {
     final _auth=FirebaseAuth.instance;
+    final screenW = MediaQuery.of(context).size.width;
+    final screenH = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text("HomePage"),
+        title: Text("HomePage",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(
+          color: Colors.white
+        ),
       ),
       drawer: Drawer(
         elevation: 4,
-        width: 300,
+        width: (screenW*300)/360,
         child: ListView(
           children: [
-            SizedBox(height: 30,),
+            SizedBox(height: (screenH*20)/672,),
             Card(
               elevation: 5,
               child: Container(
-                height: 150,
-                child: Row(
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 100,
-                      child: CircleAvatar(
-                        child: Icon(Icons.person,size: 80,),
-                      ),
-                    ),
-                    SizedBox(width: 10,),
-                    Container(
-                      width: 150,
-                      height: 120,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Owner@hotmail.com",style: TextStyle(fontSize: 15),),
-                          SizedBox(height: 5,),
-                          Text("Role : Owner"),
-                          SizedBox(height: 10,),
-                          ElevatedButton(
-                            onPressed: (){
-                              _auth.signOut().then((value){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Account Signed Out !"),
-                                    duration: Duration(seconds: 1),
-                                  )
-                                );
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignUp()));
-                              });
-                            }, 
-                            child: Row(
-                              children: [
-                                SizedBox(width: 2,),
-                                Icon(Icons.logout),
-                                SizedBox(width: 5,),
-                                Text("Sign Out"),
-                              ],
-                            )
+                child: ListTile(
+                  leading: CircleAvatar(child: Icon(Icons.person),),
+                  title: userMap.isEmpty?Text("Loading..."):Text("${userMap["Username"]}"),
+                  subtitle: Text("Role : Owner"),
+                  trailing: IconButton(
+                    onPressed: (){
+                      _auth.signOut().then((value){
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignIn()));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("User Signed Out."),
+                            backgroundColor: Colors.black,
+                            duration: Duration(seconds: 2),
                           )
-                        ],
-                      ),
-                    )
-                  ],
+                        );
+                      });
+                    }, 
+                    icon: Icon(Icons.logout)),
                 ),
               ),
             ),
-            SizedBox(height: 30,),
             InkWell(
               child: Card(
                 elevation: 5,
                 child: Container(
-                  height: 50,
+                  height: (screenH*50)/672,
                   child: Row(
                     children: [
-                      SizedBox(width: 20,),
-                      Text("Customer Reviews",style: TextStyle(fontSize: 20),),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Icon(Icons.reviews),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text("Customer Reviews",style: TextStyle(fontSize: (screenH*20)/672),),
+                      )
                     ],
                   ),
                 ),
               ),
               onTap: (){
-                Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context)=>OwnerReadReviews()));
               },
             ),
@@ -109,17 +107,22 @@ class __OwnerHomePageState extends State<OwnerHomePage> {
               child: Card(
                 elevation: 5,
                 child: Container(
-                  height: 50,
+                  height: (screenH*50)/672,
                   child: Row(
                     children: [
-                      SizedBox(width: 20,),
-                      Text("Special Dish",style: TextStyle(fontSize: 20),),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Icon(Icons.dinner_dining),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text("Special Dish",style: TextStyle(fontSize: (screenH*20)/672),),
+                      )
                     ],
                   ),
                 ),
               ),
               onTap: (){
-                Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context)=>OwnerSpecialDish()));
               },
             ),
@@ -129,7 +132,10 @@ class __OwnerHomePageState extends State<OwnerHomePage> {
       body: Screens[_currentindex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex:_currentindex, 
-        selectedFontSize: 15,      
+        selectedFontSize: (screenH*15)/672,   
+        selectedIconTheme: IconThemeData(
+          size: (screenH*30)/672
+        ),   
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.add),

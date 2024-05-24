@@ -1,3 +1,4 @@
+import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,75 +36,137 @@ class _CartState extends State<Cart> {
     40,45,50,8
   ];
 
+  Map<String,dynamic>userMap={};
+  late bool isUsermap;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseFirestore.instance.collection("Special Dish").doc("Today's Dish").get().then((value){
+      setState(() {
+        userMap=value.data()!;
+      });
+    });
+  }
 
   final _key=GlobalKey<FormState>();
   TextEditingController phoneController=TextEditingController();
   @override
-  Widget build(BuildContext context) {
-    final dref=FirebaseDatabase.instance.ref("Cart");
+  Widget build(BuildContext context) { 
+    final dref=FirebaseFirestore.instance.collection("Cart");
+    final _firestore=FirebaseFirestore.instance.collection("Orders");
     var c=context.watch<CartProvider>().cart;
     var cQ=context.watch<CartProvider>().cartQuant;
     final _auth=FirebaseAuth.instance;
+    final screenW = MediaQuery.of(context).size.width;
+    final screenH = MediaQuery.of(context).size.height;
+    var sum = 0;
+    
+    // if(c.contains(4) && userMap.isNotEmpty){
+    //   for(int i=0;i<c.length;i++)
+    //   {
+    //     if(c[i]==4)
+    //     {
+    //       sum=sum+(int.parse(userMap["Cost"])*int.parse(cQ[i]));
+    //     }
+    //     else{
+    //       sum=sum+Costs[c[i]]*int.parse(cQ[i]);
+    //     }
+    //   }
+    // }
+    // else{
+    //   for(int i=0;i<c.length;i++)
+    //   {
+    //     sum=sum+Costs[c[i]]*int.parse(cQ[i]);
+    //   }
+    // }
+
+    Future<int> FinalSum() async{
+      if(c.contains(4)){
+        for(int i=0;i<c.length;i++)
+        {
+          if(c[i]==4)
+          {
+            sum=sum+(int.parse(userMap["Cost"])*int.parse(cQ[i]));
+          }
+          else{
+            sum=sum+Costs[c[i]]*int.parse(cQ[i]);
+          }
+        }
+      }
+      else{
+        for(int i=0;i<c.length;i++)
+        {
+          sum=sum+Costs[c[i]]*int.parse(cQ[i]);
+        }
+      }
+      return sum;
+    }
+    final ans =FinalSum();
+    var total;
+    ans.then((value){
+      setState(() {
+        total=value;
+      });
+    });
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Cart"),
+      appBar: 
+      AppBar(
+        title: Text("Cart",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(
+          color: Colors.white
+        ),
         actions: [
+          c.length!=0?
           IconButton(
             onPressed:(){
-              c.length==0?
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text("Cart is Empty !"),
-                  duration: Duration(seconds: 1),
-                  backgroundColor: Colors.red,
-                )
-              ):
               showModalBottomSheet(
                 isScrollControlled: true,
                 context: context, 
                 builder: ((context){
                   return StreamBuilder( 
                     stream: FirebaseFirestore.instance.collection("Special Dish").snapshots(),
-                    builder: (context,AsyncSnapshot<QuerySnapshot>snapshot){
+                    builder: (context,snapshot){
                       return Padding(
                         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                         child: Container(
-                        height: 300,
+                        height: (screenH*350)/672,
                         child: Center(
                           child: Container(
-                            width: 330,
-                            height: 270,
+                            width: (screenW*330)/360,
+                            height: (screenH*300)/672,
                             child: SingleChildScrollView(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 10,),
+                                  SizedBox(height: (screenH*10)/672,),
                                   InkWell(
                                     child: Row(
                                       children: [
                                         Icon(Icons.location_on),
-                                        SizedBox(width: 10,),
-                                        Text("Share Current Location",style: TextStyle(fontSize: 20),),
+                                        SizedBox(width: (screenW*10)/360,),
+                                        Text("Share Current Location",style: TextStyle(fontSize: (screenH*20)/672),),
                                       ],
                                     ),
                                     onTap: ()async{
                                       currentPosition = await getposition();
-                                      await getAddressFromLatLong(currentPosition!.latitude, currentPosition!.longitude);
+                                      getAddressFromLatLong(currentPosition!.latitude, currentPosition!.longitude);
                                       setState(() {
                                         loc = true;
                                       });
                                     },
                                   ),
-                                  SizedBox(height: 10,),
+                                  SizedBox(height: (screenH*10)/672,),
                                   Container(
-                                    width: 320,
-                                    height: 50,
-                                    child: loc==true?Text(finalCurrentLocation.toString()):Text("User Location",style: TextStyle(color: Colors.grey),)
+                                    // width: (screenW*320)/360,
+                                    // height: (screenH*50)/672,
+                                    child: loc==true?Text(finalCurrentLocation.toString()):Text("",style: TextStyle(color: Colors.grey),)
                                   ),
-                                  SizedBox(height: 10,),
+                                  SizedBox(height: (screenH*10)/672,),
                                   Container(
-                                    width: 300,
-                                    padding: EdgeInsets.all(8),
+                                    width: (screenW*300)/360,
+                                    padding: EdgeInsets.only(left: 8,right: 8),
                                     child: Form(
                                       key: _key,
                                       child: TextFormField(
@@ -125,34 +188,45 @@ class _CartState extends State<Cart> {
                                             borderRadius: BorderRadius.circular(11),
                                             borderSide: BorderSide(
                                               color: Colors.black,
-                                              width: 2,
+                                              width: (screenW*2)/360,
                                             ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(11),
                                             borderSide: BorderSide(
                                               color: Colors.grey,
-                                              width: 2,
+                                              width: (screenW*2)/360,
                                             )
                                           ),
                                           focusedErrorBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(11),
                                             borderSide: BorderSide(
                                               color: Colors.red,
-                                              width: 2,
+                                              width: (screenW*2)/360,
                                             )
                                           )
                                         ),
                                       )
                                     ),
                                   ),
-                                  SizedBox(height: 20,),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8,right: 8),
+                                    child: Text("Total Cost :",style: TextStyle(fontSize: (screenH*20)/672),),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8,right: 8,bottom: 8),
+                                    child: Column(
+                                      children: [
+                                        Text("Rs ${total}",style: TextStyle(fontSize: (screenH*15)/672),)
+                                      ],
+                                    ),
+                                  ),
                                   ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green
+                                    ),
                                     onPressed: (){
-                                      if(!_key.currentState!.validate()){
-                                        return;
-                                      }
-                                      else if(loc==false)
+                                      if(loc==false)
                                       {
                                         Navigator.pop(context);
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -163,12 +237,15 @@ class _CartState extends State<Cart> {
                                           )
                                         );
                                       }
+                                      else if(!_key.currentState!.validate()){
+                                        return;
+                                      }
                                       else{
                                         Navigator.pop(context);
                                         id=DateTime.now().millisecondsSinceEpoch.toString();
                                         if(c.length==1)
                                         {
-                                          dref.child(id).set({
+                                          dref.doc(_auth.currentUser!.uid.toString()).set({
                                           "id":id.toString(),
                                           "UserEmail":_auth.currentUser!.email.toString(),
                                           "Address":finalCurrentLocation.toString(),
@@ -178,10 +255,21 @@ class _CartState extends State<Cart> {
                                           "Cost1": (c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
                                           "Total Cost":(c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
                                         });
+                                        _firestore.doc(id).set({
+                                          "id":id.toString(),
+                                          "UserEmail":_auth.currentUser!.email.toString(),
+                                          "Address":finalCurrentLocation.toString(),
+                                          "Phone Number":phoneController.text.toString(),
+                                          "Item1": (c[0]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[0]<=3)? FoodNames[c[0]] : "",
+                                          "Quantity1":cQ[0],
+                                          "Cost1": (c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
+                                          "Total Cost":(c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
+                                          "ItemLength":1
+                                        });
                                         }
                                         else if(c.length==2)
                                         {
-                                          dref.child(id).set({
+                                          dref.doc(_auth.currentUser!.uid.toString()).set({
                                           "id":id.toString(),
                                           "UserEmail":_auth.currentUser!.email.toString(),
                                           "Address":finalCurrentLocation.toString(),
@@ -194,10 +282,24 @@ class _CartState extends State<Cart> {
                                           "Cost2": (c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])}" :(c[1]<=3)? "${Costs[c[1]]*int.parse(cQ[1])}" : "",
                                           "Total Cost": (c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])}":(c[0]<=3 && c[1]<=3)? "${Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])}":"",
                                         });
+                                        _firestore.doc(id).set({
+                                          "id":id.toString(),
+                                          "UserEmail":_auth.currentUser!.email.toString(),
+                                          "Address":finalCurrentLocation.toString(),
+                                          "Phone Number":phoneController.text.toString(), 
+                                          "Item1": (c[0]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[0]<=3)? FoodNames[c[0]]:"",
+                                          "Quantity1":cQ[0],
+                                          "Cost1": (c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
+                                          "Item2": (c[1]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[1]<=3)? FoodNames[c[1]]:"",
+                                          "Quantity2":cQ[1],
+                                          "Cost2": (c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])}" :(c[1]<=3)? "${Costs[c[1]]*int.parse(cQ[1])}" : "",
+                                          "Total Cost": (c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])}":(c[0]<=3 && c[1]<=3)? "${Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])}":"",
+                                          "ItemLength":2
+                                        });
                                         }
                                         else if(c.length==3)
                                         {
-                                          dref.child(id).set({
+                                          dref.doc(_auth.currentUser!.uid.toString()).set({
                                           "id":id.toString(),
                                           "UserEmail":_auth.currentUser!.email.toString(),
                                           "Address":finalCurrentLocation.toString(),
@@ -213,10 +315,27 @@ class _CartState extends State<Cart> {
                                           "Cost3": (c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])}" :(c[2]<=3)? "${Costs[c[2]]*int.parse(cQ[2])}" : "",
                                           "Total Cost":(c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[2]]*int.parse(cQ[2])}":(c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])}":(c[0]<=3 && c[1]<=3 && c[2]<=3)? "${Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])}":"",
                                         });
+                                        _firestore.doc(id).set({
+                                          "id":id.toString(),
+                                          "UserEmail":_auth.currentUser!.email.toString(),
+                                          "Address":finalCurrentLocation.toString(),
+                                          "Phone Number":phoneController.text.toString(),
+                                          "Item1": (c[0]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[0]<=3)? FoodNames[c[0]]:"",
+                                          "Quantity1":cQ[0],
+                                          "Cost1": (c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
+                                          "Item2": (c[1]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[1]<=3)? FoodNames[c[1]]:"",
+                                          "Quantity2":cQ[1],
+                                          "Cost2": (c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])}" :(c[1]<=3)? "${Costs[c[1]]*int.parse(cQ[1])}" : "",
+                                          "Item3": (c[2]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[2]<=3)? FoodNames[c[2]]:"",
+                                          "Quantity3":cQ[2],
+                                          "Cost3": (c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])}" :(c[2]<=3)? "${Costs[c[2]]*int.parse(cQ[2])}" : "",
+                                          "Total Cost":(c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[2]]*int.parse(cQ[2])}":(c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])}":(c[0]<=3 && c[1]<=3 && c[2]<=3)? "${Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])}":"",
+                                          "ItemLength":3
+                                        });
                                         }
                                         else if(c.length==4)
                                         {
-                                          dref.child(id).set({
+                                          dref.doc(_auth.currentUser!.uid.toString()).set({
                                           "id":id.toString(),
                                           "UserEmail":_auth.currentUser!.email.toString(),
                                           "Address":finalCurrentLocation.toString(),
@@ -235,10 +354,31 @@ class _CartState extends State<Cart> {
                                           "Cost4": (c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])}" :(c[3]<=3)? "${Costs[c[3]]*int.parse(cQ[3])}" : "",
                                           "Total Cost":(c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}":(c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[3]]*int.parse(cQ[3])}":(c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])}":(c[0]<=3 && c[1]<=3 && c[2]<=3 && c[3]<=3)? "${Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}" :"",
                                         });
+
+                                        _firestore.doc(id).set({
+                                          "id":id.toString(),
+                                          "UserEmail":_auth.currentUser!.email.toString(),
+                                          "Address":finalCurrentLocation.toString(),
+                                          "Phone Number":phoneController.text.toString(),
+                                          "Item1": (c[0]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[0]<=3)? FoodNames[c[0]]:"",
+                                          "Quantity1":cQ[0],
+                                          "Cost1": (c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
+                                          "Item2": (c[1]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[1]<=3)? FoodNames[c[1]]:"",
+                                          "Quantity2":cQ[1],
+                                          "Cost2": (c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])}" :(c[1]<=3)? "${Costs[c[1]]*int.parse(cQ[1])}" : "",
+                                          "Item3": (c[2]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[2]<=3)? FoodNames[c[2]]:"",
+                                          "Quantity3":cQ[2],
+                                          "Cost3": (c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])}" :(c[2]<=3)? "${Costs[c[2]]*int.parse(cQ[2])}" : "",
+                                          "Item4": (c[3]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[3]<=3)? FoodNames[c[3]]:"",
+                                          "Quantity4":cQ[3],
+                                          "Cost4": (c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])}" :(c[3]<=3)? "${Costs[c[3]]*int.parse(cQ[3])}" : "",
+                                          "Total Cost":(c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}":(c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[3]]*int.parse(cQ[3])}":(c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])}":(c[0]<=3 && c[1]<=3 && c[2]<=3 && c[3]<=3)? "${Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}" :"",                      
+                                          "ItemLength":4
+                                        });
                                         }
                                         else if(c.length==5)
                                         {
-                                          dref.child(id).set({
+                                          dref.doc(_auth.currentUser!.uid.toString()).set({
                                           "id":id.toString(),
                                           "UserEmail":_auth.currentUser!.email.toString(),
                                           "Address":finalCurrentLocation.toString(),
@@ -260,6 +400,29 @@ class _CartState extends State<Cart> {
                                           "Cost5": (c[4]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[4])}" :(c[4]<=3)? "${Costs[c[4]]*int.parse(cQ[4])}" : "",
                                           "Total Cost":(c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])+Costs[c[4]]*int.parse(cQ[4])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])+Costs[c[4]]*int.parse(cQ[4])}":(c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[3]]*int.parse(cQ[3])+Costs[c[4]]*int.parse(cQ[4])}":(c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[4]]*int.parse(cQ[4])}" : (c[4]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[4])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}" :"",
                                         });
+                                        _firestore.doc(id).set({
+                                          "id":id.toString(),
+                                          "UserEmail":_auth.currentUser!.email.toString(),
+                                          "Address":finalCurrentLocation.toString(),
+                                          "Phone Number":phoneController.text.toString(),
+                                          "Item1": (c[0]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[0]<=3)? FoodNames[c[0]]:"",
+                                          "Quantity1":cQ[0],
+                                          "Cost1": (c[0]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])}" :(c[0]<=3)? "${Costs[c[0]]*int.parse(cQ[0])}" : "",
+                                          "Item2": (c[1]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[1]<=3)? FoodNames[c[1]]:"",
+                                          "Quantity2":cQ[1],
+                                          "Cost2": (c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])}" :(c[1]<=3)? "${Costs[c[1]]*int.parse(cQ[1])}" : "",
+                                          "Item3": (c[2]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[2]<=3)? FoodNames[c[2]]:"",
+                                          "Quantity3":cQ[2],
+                                          "Cost3": (c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])}" :(c[2]<=3)? "${Costs[c[2]]*int.parse(cQ[2])}" : "",
+                                          "Item4": (c[3]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[3]<=3)? FoodNames[c[3]]:"",
+                                          "Quantity4":cQ[3],
+                                          "Cost4": (c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])}" :(c[3]<=3)? "${Costs[c[3]]*int.parse(cQ[3])}" : "",
+                                          "Item5": (c[4]==4 && snapshot.hasData)? snapshot.data!.docs[0]["Dish Type"]:(c[4]<=3)? FoodNames[c[4]]:"",
+                                          "Quantity5":cQ[4],
+                                          "Cost5": (c[4]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[4])}" :(c[4]<=3)? "${Costs[c[4]]*int.parse(cQ[4])}" : "",
+                                          "Total Cost":(c[0]==4 && snapshot.hasData)?"${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])+Costs[c[4]]*int.parse(cQ[4])}":(c[1]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[1])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])+Costs[c[4]]*int.parse(cQ[4])}":(c[2]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[2])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[3]]*int.parse(cQ[3])+Costs[c[4]]*int.parse(cQ[4])}":(c[3]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[3])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[4]]*int.parse(cQ[4])}" : (c[4]==4 && snapshot.hasData)? "${int.parse(snapshot.data!.docs[0]["Cost"])*int.parse(cQ[4])+Costs[c[0]]*int.parse(cQ[0])+Costs[c[1]]*int.parse(cQ[1])+Costs[c[2]]*int.parse(cQ[2])+Costs[c[3]]*int.parse(cQ[3])}" :"",
+                                          "ItemLength":5
+                                        });
                                         } 
                                         if(c.contains(4)){
                                           // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Bill(snapshot.data!.docs[0]["Dish Type"],snapshot.data!.docs[0]["Cost"] )));
@@ -270,7 +433,7 @@ class _CartState extends State<Cart> {
                                                 duration: Duration(seconds: 2),
                                               )
                                             );
-                                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Bill(snapshot.data!.docs[0]["Dish Type"], snapshot.data!.docs[0]["Cost"])));
+                                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Bill(snapshot.data!.docs[0]["Dish Type"], snapshot.data!.docs[0]["Cost"],id)));
                                         }
                                         else{
                                           // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Bill("","")));
@@ -281,14 +444,18 @@ class _CartState extends State<Cart> {
                                                 duration: Duration(seconds: 2),
                                               )
                                             );
-                                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Bill("", "")));
+                                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Bill("", "",id)));
                                         }
                                       }
                                     },  
-                                    child: Row(
-                                      children: [
-                                        Text("Place Order"),
-                                      ],
+                                    child: Container(
+                                      width: (screenW*100)/360,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text("Place Order",style: TextStyle(color: Colors.white),),
+                                        ],
+                                      ),
                                     )
                                   )
                                 ],
@@ -304,7 +471,8 @@ class _CartState extends State<Cart> {
               );
             } , 
             icon: Icon(Icons.send)
-          )
+          ):
+          Text("")
         ],
       ),
       body: c.length==0?Center(child: Text("Empty Cart"))
@@ -315,53 +483,56 @@ class _CartState extends State<Cart> {
           itemCount: c.length,
           itemBuilder: (context,index){
             int mul=int.parse(cQ[index]);
-            return Card(
-              elevation: 6,
-              color: Colors.blueGrey,
-              child: Row(
-                children: [
-                  SizedBox(width: 10,),
-                  Container(
-                    width: 150,
-                    height: 170,
-                    child: ((c[index]==4) && (snapshot.hasData))?Image.network(snapshot.data!.docs[0]["ImageUrl"]):(c[index]<=3)? Image.network(photo[c[index]]):Text("")
-                  ),
-                  SizedBox(width: 10,),
-                  Container(
-                    width: 170,
-                    height: 170,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 10,),
-                        ((c[index]==4) && (snapshot.hasData))?
-                        Text("${snapshot.data!.docs[0]["Dish Type"]}",style: TextStyle(fontSize: 20,color: Colors.white),):
-                        (c[index]<=3)?
-                        Text("Item: ${FoodNames[c[index]]}",style: TextStyle(fontSize: 20,color: Colors.white),):Text(""),
-                        SizedBox(height: 10,),
-                        ((c[index]==4) && (snapshot.hasData))?
-                        Text("Quantity: ${cQ[index]}",style: TextStyle(fontSize: 20,color: Colors.white),):
-                        (c[index]<=3)?
-                        Text("Quantity: ${cQ[index]}",style: TextStyle(fontSize: 20,color: Colors.white),):Text(""),
-                        SizedBox(height: 10,),
-                        ((c[index]==4) && (snapshot.hasData))?
-                        Text("Cost: Rs ${int.parse(snapshot.data!.docs[0]["Cost"])*mul}",style: TextStyle(fontSize: 20,color: Colors.white),):
-                        (c[index]<=3)?
-                        Text("Cost: Rs ${Costs[c[index]]*mul}",style: TextStyle(fontSize: 20,color: Colors.white),):Text(""),
-                        Row(
-                          children: [
-                            SizedBox(width: 120,),
-                            IconButton(onPressed: (){
-                              context.read<CartProvider>().removeFromCart(c[index]);
-                              context.read<CartProvider>().removeQuant(cQ[index]);
-                            }, icon: Icon(Icons.delete,color: Colors.white,))
-                          ],
-                        )
-                      ],
+            return Padding(
+              padding: const EdgeInsets.only(top: 10,left: 5,right: 5),
+              child: Card(
+                elevation: 6,
+                color: Colors.green[900],
+                child: Row(
+                  children: [
+                    SizedBox(width: (screenW*10)/360,),
+                    Container(
+                      width: (screenW*150)/360,
+                      height: (screenH*150)/672,
+                      child: ((c[index]==4) && (snapshot.hasData))?Image.network(snapshot.data!.docs[0]["ImageUrl"],fit: BoxFit.cover,):(c[index]<=3)? Image.network(photo[c[index]],fit: BoxFit.cover,):Text("")
                     ),
-                  )
-                ],
-              )
+                    SizedBox(width: (screenW*10)/360,),
+                    Container(
+                      width: (screenW*170)/360,
+                      height: (screenH*170)/672,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: (screenH*10)/672,),
+                          ((c[index]==4) && (snapshot.hasData))?
+                          Text("${snapshot.data!.docs[0]["Dish Type"]}",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),):
+                          (c[index]<=3)?
+                          Text("Item: ${FoodNames[c[index]]}",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),):Text(""),
+                          SizedBox(height: (screenH*10)/672,),
+                          ((c[index]==4) && (snapshot.hasData))?
+                          Text("Quantity: ${cQ[index]}",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),):
+                          (c[index]<=3)?
+                          Text("Quantity: ${cQ[index]}",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),):Text(""),
+                          SizedBox(height: (screenH*10)/672,),
+                          ((c[index]==4) && (snapshot.hasData))?
+                          Text("Cost: Rs ${int.parse(snapshot.data!.docs[0]["Cost"])*mul}",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),):
+                          (c[index]<=3)?
+                          Text("Cost: Rs ${Costs[c[index]]*mul}",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),):Text(""),
+                          Row(
+                            children: [
+                              SizedBox(width: (screenW*120)/360,),
+                              IconButton(onPressed: (){
+                                context.read<CartProvider>().removeFromCart(c[index]);
+                                context.read<CartProvider>().removeQuant(cQ[index]);
+                              }, icon: Icon(Icons.delete,color: Colors.red,))
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ),
             );
           }
         );

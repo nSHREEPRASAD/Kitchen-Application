@@ -21,7 +21,11 @@ class _KitchenIntroState extends State<KitchenIntro> {
     var ScreenW = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ghadi's Kitchen"),
+        title: Text("Ghadi's Kitchen",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(
+          color: Colors.white
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -53,20 +57,20 @@ class _KitchenIntroState extends State<KitchenIntro> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Ghadi's Kitchen: A Tradition of Authentic Maharashtrian Cuisine",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                    Text("Ghadi's Kitchen: A Tradition of Authentic Maharashtrian Cuisine",style: TextStyle(fontSize: (ScreenH*25)/672,fontWeight: FontWeight.bold),),
                     SizedBox(height: (ScreenH*20)/672,),
-                    Text("Established in the 1980s by Mr. Vijay Ghadi in Mumbai, Ghadi's Kitchen has grown into a family-run restaurant group with branches across Mumbai, Thane, and Pune. We specialize in traditional Maharashtrian cuisine, offering a variety of dishes that cater to all palates.",style: TextStyle(fontSize: 20),),
+                    Text("Established in the 1980s by Mr. Vijay Ghadi in Mumbai, Ghadi's Kitchen has grown into a family-run restaurant group with branches across Mumbai, Thane, and Pune. We specialize in traditional Maharashtrian cuisine, offering a variety of dishes that cater to all palates.",style: TextStyle(fontSize: (ScreenH*20)/672),),
                     SizedBox(height: (ScreenH*20)/672,),
-                    Text("Our Menu:",style: TextStyle(fontSize: 23,fontWeight: FontWeight.bold),),
+                    Text("Our Menu:",style: TextStyle(fontSize: (ScreenH*20)/672 ,fontWeight: FontWeight.bold),),
                     SizedBox(height: (ScreenH*15)/672,),
-                    Text("Breakfast Delights:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                    Text("We start your day right with a selection of classic Maharashtrian breakfast dishes like Upma, Pohe, Idli-Sambar, and Dosas.",style: TextStyle(fontSize: 20),),
+                    Text("Breakfast Delights:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: (ScreenH*20)/672),),
+                    Text("We start your day right with a selection of classic Maharashtrian breakfast dishes like Upma, Pohe, Idli-Sambar, and Dosas.",style: TextStyle(fontSize: (ScreenH*20)/672),),
                     SizedBox(height: (ScreenH*10)/672,),
-                    Text("Lunch and Dinner Thalis:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                    Text("Enjoy a complete and satisfying meal with our daily specials. Our Thalis include a variety of Bhajis (vegetable fritters), Chapati (flatbreads), Dal (lentil soup), Rice, and a sweet ending with Dessert.",style: TextStyle(fontSize: 20),),
+                    Text("Lunch and Dinner Thalis:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: (ScreenH*20)/672),),
+                    Text("Enjoy a complete and satisfying meal with our daily specials. Our Thalis include a variety of Bhajis (vegetable fritters), Chapati (flatbreads), Dal (lentil soup), Rice, and a sweet ending with Dessert.",style: TextStyle(fontSize: (ScreenH*20)/672),),
                     SizedBox(height: (ScreenH*10)/672,),
-                    Text("Authentic Flavors:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                    Text("We use only the freshest ingredients and traditional recipes to create authentic Maharashtrian dishes that are both delicious and comforting.",style: TextStyle(fontSize: 20),),
+                    Text("Authentic Flavors:",style: TextStyle(fontWeight: FontWeight.bold,fontSize: (ScreenH*20)/672),),
+                    Text("We use only the freshest ingredients and traditional recipes to create authentic Maharashtrian dishes that are both delicious and comforting.",style: TextStyle(fontSize: (ScreenH*20)/672),),
                  ],
                 ),
               ),

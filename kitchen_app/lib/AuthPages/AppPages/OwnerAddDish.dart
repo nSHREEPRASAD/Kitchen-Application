@@ -26,12 +26,19 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
   final fdb=FirebaseFirestore.instance.collection("Special Dish").doc("Today's Dish");
   String imgUrl="";
   String photo="";
-  bool isUploaded=false;
+  String FilePath = "";
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
+    final screenW = MediaQuery.of(context).size.width;
+    final screenH = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Dish"),
+        title: Text("Add Dish",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(
+          color: Colors.white
+        ),
       ),
       body:Container(
         width: double.infinity,
@@ -40,114 +47,100 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SizedBox(height: (screenH*10)/672,),
               InkWell(
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black
+                child: Card(
+                  elevation: 2,
+                  child: Container(
+                    width: (screenW*300)/360,
+                    height: (screenH*200)/672,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: (screenW*300)/360,
+                          height: (screenH*200)/672,
+                          child: photo.isEmpty? Center(child: Icon(Icons.food_bank,size: (screenH*200)/672,color: Colors.grey,)):Image.file(File(photo),fit: BoxFit.cover,)
+                        ),
+                        Positioned(
+                          left:(screenH*230)/672,
+                          bottom: (screenH*10)/672,
+                          child: Icon(Icons.add_a_photo_sharp,size: (screenH*50)/672,color: Colors.blueGrey,)
+                        ),
+                        photo.isNotEmpty?
+                        Positioned(
+                          left:(screenH*250)/672,
+                          top: (screenH*10)/672,
+                          child: IconButton(
+                            onPressed: (){
+                              setState(() {
+                                photo="";
+                              });
+                            }, 
+                            icon: Icon(Icons.cancel,size: (screenH*30)/672,color: Colors.blueGrey,)
+                          )
+                        ):
+                        Text("")
+                      ],
                     )
                   ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 200,
-                        height: 200,
-                        child:isUploaded==false? Icon(Icons.food_bank,size: 200,color: Colors.grey,):Image.file(File(photo))
-                      ),
-                      Positioned(
-                        left: 130,
-                        bottom: 10,
-                        child: Icon(Icons.add_a_photo_sharp,size: 50,)
-                      )
-                    ],
-                  )
                 ),
                 onTap: (){
-                  photo.isNotEmpty?
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Photo Already Uploaded"),
-                      backgroundColor: Colors.amber,
-                      duration: Duration(seconds: 1),
-                    )
-                  ):
                   showModalBottomSheet(
                     context: context, 
                     builder: (context){
                       return Container(
-                        height: 150,
+                        height: (screenH*150)/672,
                         child: Center(
                           child: Container(
-                            width: 320,
-                            height: 100,
+                            width: (screenW*320)/360,
+                            height: (screenH*100)/672,
                             child: Column(
                               children: [
                                 InkWell(
                                   child: Row(
                                     children: [
                                       Icon(Icons.camera),
-                                      SizedBox(width: 10,),
-                                      Text("Capture From Camera",style: TextStyle(fontSize: 20),),
+                                      SizedBox(width: (screenW*10)/360,),
+                                      Text("Capture From Camera",style: TextStyle(fontSize: (screenH*20)/672),),
                                     ],
                                   ),
                                   onTap: ()async{
                                     Navigator.pop(context);
+                                    if(photo.isNotEmpty){
+                                      setState(() {
+                                        photo="";
+                                      });
+                                    }
                                     ImagePicker imagePicker=ImagePicker();
                                     XFile? file=await imagePicker.pickImage(source:ImageSource.camera );
         
                                     setState(() {
                                       photo=file!.path;
-                                      isUploaded=true;
                                     });
-                                    if(file==null) return;
-                                    String img=DateTime.now().millisecondsSinceEpoch.toString();
-                                    Reference refRoot=FirebaseStorage.instance.ref();
-                                    Reference refDir=refRoot.child("Image");
-                                    Reference refImg=refDir.child(img);
-        
-                                    try{
-                                      await refImg.putFile(File(file.path));
-                                      imgUrl=await refImg.getDownloadURL();
-                                    }
-                                    catch(e){
-                                      //error
-                                    }
                                   },
                                 ),
-                                SizedBox(height: 25,),
+                                SizedBox(height: (screenH*25)/672,),
                                 InkWell(
                                   child: Row(
                                     children: [
                                       Icon(Icons.image),
-                                      SizedBox(width: 10,),
-                                      Text("Choose From Gallery",style: TextStyle(fontSize: 20),),
+                                      SizedBox(width: (screenW*10)/360,),
+                                      Text("Choose From Gallery",style: TextStyle(fontSize: (screenH*20)/672),),
                                     ],
                                   ),
                                   onTap: () async{
                                     Navigator.pop(context);
+                                    if(photo.isNotEmpty){
+                                      setState(() {
+                                        photo="";
+                                      });
+                                    }
                                     ImagePicker imagePicker=ImagePicker();
                                     XFile? file=await imagePicker.pickImage(source: ImageSource.gallery);
                                     
                                     setState(() {
                                       photo=file!.path;
-                                      isUploaded=true;
                                     });
-                                    if(file==null) return;
-        
-                                    String img=DateTime.now().millisecondsSinceEpoch.toString();
-                                    Reference refRoot=FirebaseStorage.instance.ref();
-                                    Reference refDir=refRoot.child("Image");
-                                    Reference refImg=refDir.child(img);
-        
-                                    try{
-                                      await refImg.putFile(File(file.path));
-                                      imgUrl= await refImg.getDownloadURL();
-                                    }
-                                    catch(e){
-                                      //error
-                                    }
                                   },
                                 )
                               ],
@@ -159,9 +152,9 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                   );
                 },
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: (screenH*20)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: DropdownButton(
                   isExpanded: true,
                   value: dropDownValue,
@@ -182,9 +175,9 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                   }
                 ),
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: (screenH*20)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Form(
                   key: _key1,
                   child: TextFormField(
@@ -205,30 +198,30 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.grey,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.black,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.red,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       )
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: (screenH*20)/672,),
               Container(
-                width: 300,
+                width: (screenW*300)/360,
                 child: Form(
                   key: _key,
                   child: TextFormField(
@@ -242,14 +235,14 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                         return "Please Enter Dish Discription";
                       }
                     },
-                    maxLines: 8,
+                    maxLines: 5,
                     decoration: InputDecoration(
                       hintText: "Special Dish Description",
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide(
                           color: Colors.black,
-                          width: 2,
+                          width: (screenW*2)/360,
                         )
                       ),
                       enabledBorder: OutlineInputBorder(
@@ -268,17 +261,54 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                   ),
                 ),
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: (screenH*20)/672,),
               Container(
-                height: 50,
-                width: 300,
+                height: (screenH*50)/672,
+                width: (screenW*300)/360,
                 child: ElevatedButton(
-                  onPressed: (){
-                    if(!_key.currentState!.validate() || !_key1.currentState!.validate())
-                    {
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green
+                  ),
+                  onPressed: () async{
+                    try{
+                      FirebaseStorage.instance.ref().child("Image").child("SpecialDish").delete();
+                    }
+                    catch(err){
+                      //error
+                    }
+                    if(photo.isEmpty){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Please Add Dish-Image"),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        )
+                      );
+                    }
+                    else if(!_key1.currentState!.validate() || !_key.currentState!.validate()){
                       return;
                     }
                     else{
+                      setState(() {
+                        isLoading=true;
+                      });
+                      Future.delayed(Duration(seconds: 7),() {
+                        setState(() {
+                          isLoading=false;
+                        });
+                      },);
+                        String img="SpecialDish";
+                        Reference refRoot=FirebaseStorage.instance.ref();
+                        Reference refDir=refRoot.child("Image");
+                        Reference refImg=refDir.child(img);
+        
+                        try{
+                          await refImg.putFile(File(photo));
+                          imgUrl=await refImg.getDownloadURL();
+                        }
+                        catch(e){
+                          //error
+                        }
                       fdb.set({
                         "ImageUrl":imgUrl.toString(),
                         "Dish Type":dropDownValue.toString(),
@@ -286,9 +316,11 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                         "Cost":costController.text.toString(),
                       }).then((value){
                         setState(() {
-                          isUploaded=false;
                           descriptionController.clear();
                           costController.clear();
+                          setState(() {
+                            photo="";
+                          });
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -300,16 +332,20 @@ class _OwnerAddDishState extends State<OwnerAddDish> {
                       });
                     }
                   }, 
-                  child:Row(
+                  child:
+                  isLoading==true?
+                  Center(child: CircularProgressIndicator(color: Colors.white,),):
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(width: 20,),
-                      Icon(Icons.send),
-                      SizedBox(width: 20,),
-                      Text("Post Dish",style: TextStyle(fontSize: 20),)
+                      Text("Post Dish",style: TextStyle(fontSize: (screenH*20)/672,color: Colors.white),),
+                      SizedBox(width: (screenW*15)/672,),
+                      Icon(Icons.send,color: Colors.white,),
                     ],
                   ) 
                 ),
-              )
+              ),
+              SizedBox(height: (screenH*10)/672,)
             ],
           ),
         ),
